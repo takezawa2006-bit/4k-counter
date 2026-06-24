@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4Kカウンター｜日本上場企業 4K達成度チェッカー</title>
+<style>
+:root {
+  --bg: #0f1117;
+  --bg2: #1a1d27;
+  --bg3: #22263a;
+  --border: #2e3350;
+  --text: #e2e6f0;
+  --muted: #7b82a0;
+  --accent: #00d4ff;
+  --gold: #ffd700;
+  --green: #4caf50;
+  --orange: #ff9800;
+  --red: #f44336;
+  --score100: #ffd700;
+  --score67: #4caf50;
+  --score34: #ff9800;
+  --score0: #5a6070;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Hiragino Kaku Gothic Pro','Meiryo',sans-serif; font-size: 14px; min-height: 100vh; }
+
+/* ===== HEADER ===== */
+.header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 16px 24px; }
+.header-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.logo { font-size: 22px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+.logo span { color: var(--gold); }
+.header-meta { font-size: 12px; color: var(--muted); }
+.header-meta strong { color: var(--text); }
+.sample-badge { background: rgba(255,152,0,0.15); border: 1px solid var(--orange); color: var(--orange); font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; }
+
+/* ===== STATS BAR ===== */
+.stats-bar { display: flex; gap: 0; background: var(--bg2); border-bottom: 1px solid var(--border); overflow-x: auto; }
+.stat-item { flex: 1; min-width: 110px; padding: 10px 16px; text-align: center; border-right: 1px solid var(--border); }
+.stat-item:last-child { border-right: none; }
+.stat-num { font-size: 22px; font-weight: 700; line-height: 1; }
+.stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.s100 { color: var(--gold); }
+.s67  { color: var(--green); }
+.s34  { color: var(--orange); }
+.s0   { color: var(--score0); }
+
+/* ===== CONTROLS ===== */
+.controls { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.search-wrap { position: relative; flex: 1; min-width: 200px; }
+.search-wrap input {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text); border-radius: 6px; padding: 8px 12px 8px 36px;
+  font-size: 13px; outline: none;
+}
+.search-wrap input:focus { border-color: var(--accent); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; }
+select {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  border-radius: 6px; padding: 8px 12px; font-size: 13px; outline: none; cursor: pointer;
+}
+select:focus { border-color: var(--accent); }
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); background: var(--bg3); color: var(--muted); transition: all .15s; user-select: none; }
+.chip:hover { border-color: var(--accent); color: var(--text); }
+.chip.active { border-color: var(--accent); background: rgba(0,212,255,0.1); color: var(--accent); }
+.chip-dot { width: 8px; height: 8px; border-radius: 50%; }
+.chip-g .chip-dot { background: var(--green); }
+.chip-p .chip-dot { background: var(--accent); }
+.chip-f .chip-dot { background: var(--gold); }
+
+/* ===== RESULT INFO ===== */
+.result-info { padding: 8px 24px; font-size: 12px; color: var(--muted); background: var(--bg); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.sort-hint { display: flex; gap: 4px; align-items: center; }
+
+/* ===== TABLE ===== */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+thead th {
+  background: var(--bg2); color: var(--muted); font-size: 11px; font-weight: 600;
+  padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 1; cursor: pointer; user-select: none;
+  letter-spacing: 0.05em; white-space: nowrap;
+}
+thead th:hover { color: var(--text); }
+thead th.sort-asc::after  { content: ' ↑'; color: var(--accent); }
+thead th.sort-desc::after { content: ' ↓'; color: var(--accent); }
+tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+tbody tr:hover { background: var(--bg2); }
+tbody td { padding: 10px 12px; vertical-align: middle; }
+
+/* Code */
+.code-cell { font-family: monospace; font-size: 13px; color: var(--muted); }
+/* Name */
+.name-cell { font-weight: 600; font-size: 13px; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Sector */
+.sector-cell { font-size: 11px; color: var(--muted); }
+/* Score badge */
+.score-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 52px; height: 28px; border-radius: 14px; font-size: 14px; font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.s-100 { background: rgba(255,215,0,0.15); color: var(--gold); border: 1px solid rgba(255,215,0,0.4); }
+.s-high { background: rgba(76,175,80,0.12); color: var(--green); border: 1px solid rgba(76,175,80,0.35); }
+.s-mid  { background: rgba(255,152,0,0.12); color: var(--orange); border: 1px solid rgba(255,152,0,0.35); }
+.s-low  { background: rgba(244,67,54,0.12); color: var(--red); border: 1px solid rgba(244,67,54,0.35); }
+.s-zero { background: rgba(90,96,112,0.15); color: var(--score0); border: 1px solid rgba(90,96,112,0.35); }
+/* Criterion cell */
+.crit-cell { display: flex; align-items: center; gap: 5px; font-size: 12px; }
+.crit-icon { font-size: 14px; flex-shrink: 0; }
+.crit-val { font-size: 11px; }
+.crit-ok  .crit-val { color: var(--green); }
+.crit-ng  .crit-val { color: var(--muted); }
+.crit-ok  .crit-icon { color: var(--green); }
+.crit-ng  .crit-icon { color: var(--border); }
+/* Profit dual-line */
+.profit-vals { display: flex; flex-direction: column; gap: 1px; }
+.profit-vals span { font-size: 10px; }
+.profit-vals .lbl { color: var(--muted); font-size: 9px; }
+
+/* ===== PAGINATION ===== */
+.pagination { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 16px 24px; flex-wrap: wrap; }
+.page-btn {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer;
+  transition: all .15s;
+}
+.page-btn:hover { border-color: var(--accent); color: var(--accent); }
+.page-btn.active { background: rgba(0,212,255,0.15); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.page-btn:disabled { opacity: 0.3; cursor: default; }
+.page-info { font-size: 12px; color: var(--muted); padding: 0 8px; }
+
+/* ===== LEGEND ===== */
+.legend { background: var(--bg2); border-top: 1px solid var(--border); padding: 16px 24px; }
+.legend-title { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 8px; letter-spacing: 0.05em; }
+.legend-grid { display: flex; flex-wrap: wrap; gap: 16px; }
+.legend-item { display: flex; align-items: flex-start; gap: 8px; }
+.legend-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.legend-text strong { display: block; font-size: 12px; color: var(--text); }
+.legend-text span { font-size: 11px; color: var(--muted); }
+.score-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.score-leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.score-leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ===== FOOTER ===== */
+.footer { text-align: center; padding: 12px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); }
+.footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== EMPTY STATE ===== */
+.empty { text-align: center; padding: 60px 24px; color: var(--muted); }
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+/* ===== LOADING ===== */
+.loading { text-align: center; padding: 60px; color: var(--muted); }
+.spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin-bottom: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 768px) {
+  .stats-bar { overflow-x: auto; }
+  .stat-item { min-width: 80px; padding: 8px 10px; }
+  .stat-num { font-size: 18px; }
+  .header { padding: 12px 16px; }
+  .controls { padding: 10px 16px; }
+  .result-info { padding: 6px 16px; }
+  tbody td { padding: 8px 10px; }
+  .profit-vals { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <span class="logo">4K<span>カウンター</span></span>
+      <span id="sampleBadge" class="sample-badge" style="display:none">サンプルデータ</span>
+    </div>
+    <div class="header-meta">
+      日本上場企業の4K達成度 ／ 更新: <strong id="updatedAt">—</strong>
+    </div>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-num" id="statTotal">—</div>
+    <div class="stat-label">対象企業数</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num s100" id="stat100">—</div>
+    <div class="stat-label">100点（完全4K）</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num s67" id="stat67">—</div>
+    <div class="stat-label">67点以上</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num s34" id="stat34">—</div>
+    <div class="stat-label">34点以上</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num s0" id="stat0">—</div>
+    <div class="stat-label">0点（未達）</div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="会社名・証券コードで検索">
+  </div>
+  <select id="sectorSelect"><option value="">全業種</option></select>
+  <select id="marketSelect">
+    <option value="">全市場</option>
+    <option value="プライム">プライム</option>
+    <option value="スタンダード">スタンダード</option>
+    <option value="グロース">グロース</option>
+  </select>
+  <select id="scoreSelect">
+    <option value="all">全スコア</option>
+    <option value="100">100点のみ</option>
+    <option value="67">67点以上</option>
+    <option value="34">34点以上</option>
+    <option value="1">1点以上</option>
+    <option value="0">0点のみ</option>
+  </select>
+  <div class="filter-chips">
+    <div class="chip chip-g" id="chipGrowth" onclick="toggleChip('growth')">
+      <span class="chip-dot"></span>高成長
+    </div>
+    <div class="chip chip-p" id="chipProfit" onclick="toggleChip('profit')">
+      <span class="chip-dot"></span>高収益
+    </div>
+    <div class="chip chip-f" id="chipFinance" onclick="toggleChip('finance')">
+      <span class="chip-dot"></span>高財務
+    </div>
+  </div>
+</div>
+
+<!-- RESULT INFO -->
+<div class="result-info">
+  <span id="resultCount">読み込み中...</span>
+  <span class="sort-hint" id="sortHint"></span>
+</div>
+
+<!-- TABLE -->
+<div class="table-wrap" id="tableWrap">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div>データを読み込み中...</div>
+  </div>
+</div>
+
+<!-- PAGINATION -->
+<div class="pagination" id="pagination"></div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-title">4K基準（たけざわ投資塾）</div>
+  <div class="legend-grid">
+    <div class="legend-item">
+      <div class="legend-icon" style="color:var(--green)">📈</div>
+      <div class="legend-text">
+        <strong>高成長（34点）</strong>
+        <span>直近3年間の売上高成長率（CAGR）≥ 10%</span>
+      </div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-icon" style="color:var(--accent)">💰</div>
+      <div class="legend-text">
+        <strong>高収益（33点）</strong>
+        <span>今期・来期の営業利益率がともに 10%超</span>
+      </div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-icon" style="color:var(--gold)">🏦</div>
+      <div class="legend-text">
+        <strong>高財務（33点）</strong>
+        <span>自己資本比率 ≥ 50%（金融・不動産業は ≥ 10%）</span>
+      </div>
+    </div>
+  </div>
+  <div class="score-legend">
+    <div class="score-leg-item"><div class="score-leg-dot" style="background:var(--gold)"></div>100点: 全基準達成（完全4K企業）</div>
+    <div class="score-leg-item"><div class="score-leg-dot" style="background:var(--green)"></div>67点: 2基準達成（成長×収益）</div>
+    <div class="score-leg-item"><div class="score-leg-dot" style="background:var(--orange)"></div>34–66点: 1〜2基準達成</div>
+    <div class="score-leg-item"><div class="score-leg-dot" style="background:var(--red)"></div>1–33点: 1基準のみ達成</div>
+    <div class="score-leg-item"><div class="score-leg-dot" style="background:var(--score0)"></div>0点: 未達</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  データ出典: <a href="https://jpx-jquants.com/" target="_blank">J-Quants API (JPX)</a>
+  ／ 本アプリは投資判断の参考情報です。最終判断はご自身でお願いします。
+</div>
+
+<script>
+'use strict';
+// ===== CONSTANTS =====
+const PER_PAGE = 50;
+const FINANCIAL_SECTORS = new Set(['銀行業','証券・先物商品取引業','保険業','その他金融業','不動産業']);
+
+// ===== STATE =====
+let allCompanies = [];
+let filtered = [];
+let page = 1;
+let sortCol = 'score';
+let sortDir = 'desc';
+let filters = { search: '', sector: '', market: '', score: 'all', growth: false, profit: false, finance: false };
+
+// ===== SCORE LOGIC =====
+function calcScore(c) {
+  const threshold = c.is_financial_sector ? 0.10 : 0.50;
+  const highGrowth  = typeof c.cagr_3yr === 'number' && c.cagr_3yr >= 0.10;
+  const highProfit  = typeof c.op_margin_current === 'number' && c.op_margin_current > 0.10
+                   && typeof c.op_margin_next    === 'number' && c.op_margin_next    > 0.10;
+  const highFinance = typeof c.equity_ratio === 'number' && c.equity_ratio >= threshold;
+  const score = (highGrowth ? 34 : 0) + (highProfit ? 33 : 0) + (highFinance ? 33 : 0);
+  return { highGrowth, highProfit, highFinance, score };
+}
+
+// ===== FORMAT HELPERS =====
+const pct  = v => (v == null ? '—' : (v * 100).toFixed(1) + '%');
+const pctN = v => (v == null ? '—' : (v > 0 ? '+' : '') + (v * 100).toFixed(1) + '%');
+
+function scoreBadgeClass(s) {
+  if (s === 100) return 's-100';
+  if (s >= 67)  return 's-high';
+  if (s >= 34)  return 's-mid';
+  if (s >= 1)   return 's-low';
+  return 's-zero';
+}
+
+// ===== FILTER & SORT =====
+function applyAll() {
+  const q = filters.search.toLowerCase();
+  filtered = allCompanies.filter(c => {
+    if (q && !c.name.toLowerCase().includes(q) && !c.code.includes(q)) return false;
+    if (filters.sector && c.sector !== filters.sector) return false;
+    if (filters.market && c.market !== filters.market) return false;
+    if (filters.growth  && !c.highGrowth)  return false;
+    if (filters.profit  && !c.highProfit)  return false;
+    if (filters.finance && !c.highFinance) return false;
+    const s = c.score;
+    if (filters.score === '100' && s !== 100) return false;
+    if (filters.score === '67'  && s < 67)  return false;
+    if (filters.score === '34'  && s < 34)  return false;
+    if (filters.score === '1'   && s < 1)   return false;
+    if (filters.score === '0'   && s !== 0) return false;
+    return true;
+  });
+
+  filtered.sort((a, b) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === 'string') return sortDir === 'asc' ? av.localeCompare(bv,'ja') : bv.localeCompare(av,'ja');
+    return sortDir === 'asc' ? av - bv : bv - av;
+  });
+
+  page = 1;
+  render();
+}
+
+// ===== RENDER =====
+function render() {
+  renderResult();
+  renderTable();
+  renderPagination();
+}
+
+function renderResult() {
+  document.getElementById('resultCount').textContent =
+    `${filtered.length.toLocaleString()}社を表示`;
+  document.getElementById('sortHint').textContent =
+    `並び順: ${colLabel(sortCol)} ${sortDir === 'asc' ? '↑' : '↓'}`;
+}
+
+function colLabel(col) {
+  return {score:'スコア',cagr_3yr:'3年CAGR',op_margin_current:'今期OPM',
+          op_margin_next:'来期OPM',equity_ratio:'自己資本比率',name:'会社名',code:'コード'}[col] || col;
+}
+
+function renderTable() {
+  const wrap = document.getElementById('tableWrap');
+  const start = (page - 1) * PER_PAGE;
+  const rows  = filtered.slice(start, start + PER_PAGE);
+
+  if (rows.length === 0) {
+    wrap.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div>条件に一致する企業が見つかりません</div>`;
+    return;
+  }
+
+  const cols = [
+    {key:'code',            label:'コード',  cls:'code-cell'},
+    {key:'name',            label:'会社名',  cls:'name-cell'},
+    {key:'sector',          label:'業種',    cls:'sector-cell'},
+    {key:'score',           label:'スコア',  cls:''},
+    {key:'highGrowth',      label:'高成長',  cls:''},
+    {key:'highProfit',      label:'高収益',  cls:''},
+    {key:'highFinance',     label:'高財務',  cls:''},
+    {key:'cagr_3yr',        label:'3年CAGR', cls:''},
+    {key:'op_margin_current',label:'今期OPM',cls:''},
+    {key:'op_margin_next',  label:'来期OPM', cls:''},
+    {key:'equity_ratio',    label:'自己資本比率',cls:''},
+  ];
+
+  let thead = '<thead><tr>';
+  cols.forEach(c => {
+    const cls = c.key === sortCol ? ('sort-' + sortDir) : '';
+    const sortable = ['code','name','score','cagr_3yr','op_margin_current','op_margin_next','equity_ratio'].includes(c.key);
+    thead += `<th class="${cls}" ${sortable ? `onclick="sortBy('${c.key}')"` : ''}>${c.label}</th>`;
+  });
+  thead += '</tr></thead>';
+
+  let tbody = '<tbody>';
+  rows.forEach(c => {
+    const bc = scoreBadgeClass(c.score);
+    const threshold = c.is_financial_sector ? 0.10 : 0.50;
+
+    const growCell = `<div class="crit-cell ${c.highGrowth ? 'crit-ok' : 'crit-ng'}">
+      <span class="crit-icon">${c.highGrowth ? '✓' : '✗'}</span>
+      <span class="crit-val">${pct(c.cagr_3yr)}</span>
+    </div>`;
+
+    const profitCell = `<div class="crit-cell ${c.highProfit ? 'crit-ok' : 'crit-ng'}">
+      <span class="crit-icon">${c.highProfit ? '✓' : '✗'}</span>
+      <div class="profit-vals">
+        <span><span class="lbl">今期</span> ${pct(c.op_margin_current)}</span>
+        <span><span class="lbl">来期</span> ${pct(c.op_margin_next)}</span>
+      </div>
+    </div>`;
+
+    const finNote = c.is_financial_sector ? `<span style="font-size:9px;color:var(--muted)">（金融${Math.round(threshold*100)}%基準）</span>` : '';
+    const finCell = `<div class="crit-cell ${c.highFinance ? 'crit-ok' : 'crit-ng'}">
+      <span class="crit-icon">${c.highFinance ? '✓' : '✗'}</span>
+      <div class="profit-vals"><span>${pct(c.equity_ratio)}</span>${finNote}</div>
+    </div>`;
+
+    tbody += `<tr>
+      <td class="code-cell">${c.code}</td>
+      <td class="name-cell" title="${c.name}">${c.name}</td>
+      <td class="sector-cell">${c.sector}</td>
+      <td><span class="score-badge ${bc}">${c.score}</span></td>
+      <td>${growCell}</td>
+      <td>${profitCell}</td>
+      <td>${finCell}</td>
+      <td style="font-size:12px;color:${c.highGrowth?'var(--green)':'var(--muted)'}">${pct(c.cagr_3yr)}</td>
+      <td style="font-size:12px;color:${c.highProfit?'var(--green)':'var(--muted)'}">${pct(c.op_margin_current)}</td>
+      <td style="font-size:12px;color:${(c.op_margin_next!=null&&c.op_margin_next>0.10)?'var(--green)':'var(--muted)'}">${pct(c.op_margin_next)}</td>
+      <td style="font-size:12px;color:${c.highFinance?'var(--green)':'var(--muted)'}">${pct(c.equity_ratio)}</td>
+    </tr>`;
+  });
+  tbody += '</tbody>';
+
+  wrap.innerHTML = `<table>${thead}${tbody}</table>`;
+}
+
+function renderPagination() {
+  const total = Math.ceil(filtered.length / PER_PAGE);
+  const pg = document.getElementById('pagination');
+  if (total <= 1) { pg.innerHTML = ''; return; }
+
+  let html = `<button class="page-btn" onclick="goPage(${page-1})" ${page===1?'disabled':''}>‹ 前</button>`;
+  const range = [];
+  for (let i = 1; i <= total; i++) {
+    if (i === 1 || i === total || (i >= page-2 && i <= page+2)) range.push(i);
+    else if (range[range.length-1] !== '...') range.push('...');
+  }
+  range.forEach(r => {
+    if (r === '...') { html += `<span class="page-info">…</span>`; }
+    else { html += `<button class="page-btn ${r===page?'active':''}" onclick="goPage(${r})">${r}</button>`; }
+  });
+  html += `<button class="page-btn" onclick="goPage(${page+1})" ${page===total?'disabled':''}>次 ›</button>`;
+  html += `<span class="page-info">${filtered.length}社中 ${(page-1)*PER_PAGE+1}〜${Math.min(page*PER_PAGE,filtered.length)}社</span>`;
+  pg.innerHTML = html;
+}
+
+function renderStats(companies) {
+  const s100 = companies.filter(c => c.score === 100).length;
+  const s67  = companies.filter(c => c.score >= 67).length;
+  const s34  = companies.filter(c => c.score >= 34).length;
+  const s0   = companies.filter(c => c.score === 0).length;
+  document.getElementById('statTotal').textContent = companies.length.toLocaleString();
+  document.getElementById('stat100').textContent   = s100.toLocaleString();
+  document.getElementById('stat67').textContent    = s67.toLocaleString();
+  document.getElementById('stat34').textContent    = s34.toLocaleString();
+  document.getElementById('stat0').textContent     = s0.toLocaleString();
+}
+
+function renderSectors(companies) {
+  const sectors = [...new Set(companies.map(c => c.sector))].sort((a,b) => a.localeCompare(b,'ja'));
+  const sel = document.getElementById('sectorSelect');
+  sectors.forEach(s => {
+    const o = document.createElement('option'); o.value = s; o.textContent = s;
+    sel.appendChild(o);
+  });
+}
+
+// ===== SORT =====
+function sortBy(col) {
+  if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortCol = col; sortDir = col === 'score' ? 'desc' : 'asc'; }
+  applyAll();
+}
+
+// ===== PAGE NAV =====
+function goPage(p) {
+  const total = Math.ceil(filtered.length / PER_PAGE);
+  if (p < 1 || p > total) return;
+  page = p;
+  renderTable();
+  renderPagination();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ===== CHIPS =====
+function toggleChip(key) {
+  filters[key] = !filters[key];
+  document.getElementById('chip' + key.charAt(0).toUpperCase() + key.slice(1))
+    .classList.toggle('active', filters[key]);
+  applyAll();
+}
+
+// ===== EVENT LISTENERS =====
+document.getElementById('searchInput').addEventListener('input', e => {
+  filters.search = e.target.value; applyAll();
+});
+document.getElementById('sectorSelect').addEventListener('change', e => {
+  filters.sector = e.target.value; applyAll();
+});
+document.getElementById('marketSelect').addEventListener('change', e => {
+  filters.market = e.target.value; applyAll();
+});
+document.getElementById('scoreSelect').addEventListener('change', e => {
+  filters.score = e.target.value; applyAll();
+});
+
+// ===== LOAD DATA =====
+async function loadData() {
+  try {
+    const res  = await fetch('data.json');
+    const data = await res.json();
+
+    allCompanies = data.companies.map(c => {
+      const { highGrowth, highProfit, highFinance, score } = calcScore(c);
+      return { ...c, highGrowth, highProfit, highFinance, score };
+    });
+
+    // Sort by score desc by default
+    allCompanies.sort((a,b) => b.score - a.score || a.code.localeCompare(b.code));
+
+    const dt = new Date(data.updated_at);
+    document.getElementById('updatedAt').textContent =
+      `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+
+    if (data.is_sample) {
+      document.getElementById('sampleBadge').style.display = 'inline';
+    }
+
+    renderStats(allCompanies);
+    renderSectors(allCompanies);
+    applyAll();
+
+  } catch(e) {
+    document.getElementById('tableWrap').innerHTML =
+      `<div class="empty"><div class="empty-icon">⚠️</div>データの読み込みに失敗しました。<br><small>${e.message}</small></div>`;
+    document.getElementById('resultCount').textContent = 'エラー';
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>

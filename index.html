@@ -3,543 +3,919 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>4Kカウンター｜日本上場企業 4K達成度チェッカー</title>
+<title>4Kカウンター｜たけざわ投資塾</title>
 <style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #0f1117;
-  --bg2: #1a1d27;
-  --bg3: #22263a;
-  --border: #2e3350;
-  --text: #e2e6f0;
-  --muted: #7b82a0;
-  --accent: #00d4ff;
-  --gold: #ffd700;
-  --green: #4caf50;
-  --orange: #ff9800;
-  --red: #f44336;
-  --score100: #ffd700;
-  --score67: #4caf50;
-  --score34: #ff9800;
-  --score0: #5a6070;
+  --bg:        #05080f;
+  --bg2:       #0c1121;
+  --bg3:       #131929;
+  --card:      #0e1628;
+  --border:    #1c2a45;
+  --border2:   #243654;
+  --text:      #dce6f5;
+  --muted:     #5a7098;
+  --faint:     #2a3a55;
+  --gold:      #f59e0b;
+  --gold2:     #fcd34d;
+  --green:     #10b981;
+  --green2:    #34d399;
+  --orange:    #f97316;
+  --red:       #ef4444;
+  --grey:      #4b5563;
+  --accent:    #3b82f6;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'Hiragino Kaku Gothic Pro','Meiryo',sans-serif; font-size: 14px; min-height: 100vh; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Hiragino Kaku Gothic Pro','Meiryo','Yu Gothic','sans-serif';
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
 /* ===== HEADER ===== */
-.header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 16px 24px; }
-.header-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-.logo { font-size: 22px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
-.logo span { color: var(--gold); }
-.header-meta { font-size: 12px; color: var(--muted); }
-.header-meta strong { color: var(--text); }
-.sample-badge { background: rgba(255,152,0,0.15); border: 1px solid var(--orange); color: var(--orange); font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; }
-
-/* ===== STATS BAR ===== */
-.stats-bar { display: flex; gap: 0; background: var(--bg2); border-bottom: 1px solid var(--border); overflow-x: auto; }
-.stat-item { flex: 1; min-width: 110px; padding: 10px 16px; text-align: center; border-right: 1px solid var(--border); }
-.stat-item:last-child { border-right: none; }
-.stat-num { font-size: 22px; font-weight: 700; line-height: 1; }
-.stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
-.s100 { color: var(--gold); }
-.s67  { color: var(--green); }
-.s34  { color: var(--orange); }
-.s0   { color: var(--score0); }
-
-/* ===== CONTROLS ===== */
-.controls { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.search-wrap { position: relative; flex: 1; min-width: 200px; }
-.search-wrap input {
-  width: 100%; background: var(--bg3); border: 1px solid var(--border);
-  color: var(--text); border-radius: 6px; padding: 8px 12px 8px 36px;
-  font-size: 13px; outline: none;
+.site-header {
+  width: 100%;
+  padding: 18px 24px 0;
+  text-align: center;
+  position: relative;
 }
-.search-wrap input:focus { border-color: var(--accent); }
-.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; }
-select {
-  background: var(--bg3); border: 1px solid var(--border); color: var(--text);
-  border-radius: 6px; padding: 8px 12px; font-size: 13px; outline: none; cursor: pointer;
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 6px;
 }
-select:focus { border-color: var(--accent); }
-.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); background: var(--bg3); color: var(--muted); transition: all .15s; user-select: none; }
-.chip:hover { border-color: var(--accent); color: var(--text); }
-.chip.active { border-color: var(--accent); background: rgba(0,212,255,0.1); color: var(--accent); }
-.chip-dot { width: 8px; height: 8px; border-radius: 50%; }
-.chip-g .chip-dot { background: var(--green); }
-.chip-p .chip-dot { background: var(--accent); }
-.chip-f .chip-dot { background: var(--gold); }
-
-/* ===== RESULT INFO ===== */
-.result-info { padding: 8px 24px; font-size: 12px; color: var(--muted); background: var(--bg); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-.sort-hint { display: flex; gap: 4px; align-items: center; }
-
-/* ===== TABLE ===== */
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-thead th {
-  background: var(--bg2); color: var(--muted); font-size: 11px; font-weight: 600;
-  padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 1; cursor: pointer; user-select: none;
-  letter-spacing: 0.05em; white-space: nowrap;
+.brand-dot {
+  width: 5px; height: 5px;
+  background: var(--gold);
+  border-radius: 50%;
 }
-thead th:hover { color: var(--text); }
-thead th.sort-asc::after  { content: ' ↑'; color: var(--accent); }
-thead th.sort-desc::after { content: ' ↓'; color: var(--accent); }
-tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
-tbody tr:hover { background: var(--bg2); }
-tbody td { padding: 10px 12px; vertical-align: middle; }
-
-/* Code */
-.code-cell { font-family: monospace; font-size: 13px; color: var(--muted); }
-/* Name */
-.name-cell { font-weight: 600; font-size: 13px; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* Sector */
-.sector-cell { font-size: 11px; color: var(--muted); }
-/* Score badge */
-.score-badge {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 52px; height: 28px; border-radius: 14px; font-size: 14px; font-weight: 800;
-  letter-spacing: -0.5px;
+.app-title {
+  font-size: clamp(32px, 6vw, 52px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  background: linear-gradient(135deg, #f59e0b 0%, #fcd34d 40%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
 }
-.s-100 { background: rgba(255,215,0,0.15); color: var(--gold); border: 1px solid rgba(255,215,0,0.4); }
-.s-high { background: rgba(76,175,80,0.12); color: var(--green); border: 1px solid rgba(76,175,80,0.35); }
-.s-mid  { background: rgba(255,152,0,0.12); color: var(--orange); border: 1px solid rgba(255,152,0,0.35); }
-.s-low  { background: rgba(244,67,54,0.12); color: var(--red); border: 1px solid rgba(244,67,54,0.35); }
-.s-zero { background: rgba(90,96,112,0.15); color: var(--score0); border: 1px solid rgba(90,96,112,0.35); }
-/* Criterion cell */
-.crit-cell { display: flex; align-items: center; gap: 5px; font-size: 12px; }
-.crit-icon { font-size: 14px; flex-shrink: 0; }
-.crit-val { font-size: 11px; }
-.crit-ok  .crit-val { color: var(--green); }
-.crit-ng  .crit-val { color: var(--muted); }
-.crit-ok  .crit-icon { color: var(--green); }
-.crit-ng  .crit-icon { color: var(--border); }
-/* Profit dual-line */
-.profit-vals { display: flex; flex-direction: column; gap: 1px; }
-.profit-vals span { font-size: 10px; }
-.profit-vals .lbl { color: var(--muted); font-size: 9px; }
+.app-title span {
+  display: inline-block;
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.app-sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 32px;
+}
 
-/* ===== PAGINATION ===== */
-.pagination { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 16px 24px; flex-wrap: wrap; }
-.page-btn {
-  background: var(--bg3); border: 1px solid var(--border); color: var(--text);
-  border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer;
+/* ===== SEARCH ===== */
+.search-section {
+  width: 100%;
+  max-width: 680px;
+  padding: 0 20px;
+  position: relative;
+  z-index: 10;
+}
+.search-box {
+  position: relative;
+  background: var(--bg2);
+  border: 1.5px solid var(--border2);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  transition: border-color .2s, box-shadow .2s;
+  box-shadow: 0 4px 24px rgba(0,0,0,.4);
+}
+.search-box:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(245,158,11,.12), 0 4px 24px rgba(0,0,0,.4);
+}
+.search-icon { font-size: 20px; flex-shrink: 0; margin-right: 10px; color: var(--muted); }
+.search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 17px;
+  padding: 18px 0;
+  font-family: inherit;
+}
+.search-input::placeholder { color: var(--muted); }
+.clear-btn {
+  background: none; border: none; cursor: pointer; color: var(--muted);
+  font-size: 18px; padding: 4px; border-radius: 50%; transition: color .15s;
+  display: none;
+}
+.clear-btn:hover { color: var(--text); }
+.clear-btn.visible { display: block; }
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0; right: 0;
+  background: var(--bg2);
+  border: 1.5px solid var(--border2);
+  border-radius: 14px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.6);
+  overflow: hidden;
+  display: none;
+  z-index: 100;
+}
+.dropdown.open { display: block; }
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 18px;
+  cursor: pointer;
+  transition: background .12s;
+  border-bottom: 1px solid var(--border);
+}
+.dropdown-item:last-child { border-bottom: none; }
+.dropdown-item:hover,
+.dropdown-item.focused { background: var(--bg3); }
+.di-code {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--gold);
+  background: rgba(245,158,11,.1);
+  border: 1px solid rgba(245,158,11,.2);
+  border-radius: 6px;
+  padding: 2px 8px;
+  flex-shrink: 0;
+  min-width: 52px;
+  text-align: center;
+}
+.di-name { font-size: 14px; font-weight: 600; flex: 1; }
+.di-sector { font-size: 11px; color: var(--muted); }
+.dropdown-empty {
+  padding: 20px 18px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ===== SAMPLE NOTICE ===== */
+.notice {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.notice-sample {
+  background: rgba(249,115,22,.1);
+  border: 1px solid rgba(249,115,22,.3);
+  color: var(--orange);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 10px;
+}
+
+/* ===== RESULT AREA ===== */
+.result-area {
+  width: 100%;
+  max-width: 720px;
+  padding: 32px 20px 60px;
+  display: none;
+}
+.result-area.visible { display: block; }
+
+/* Company header */
+.co-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.co-info { flex: 1; }
+.co-code {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--gold);
+  background: rgba(245,158,11,.1);
+  border: 1px solid rgba(245,158,11,.25);
+  border-radius: 6px;
+  padding: 2px 10px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+.co-name { font-size: clamp(20px, 4vw, 26px); font-weight: 800; margin-bottom: 6px; line-height: 1.2; }
+.co-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+.co-tag {
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+.co-fin-tag {
+  font-size: 11px;
+  color: var(--accent);
+  background: rgba(59,130,246,.1);
+  border: 1px solid rgba(59,130,246,.25);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+/* Divider */
+.divider { height: 1px; background: var(--border); margin: 0 0 28px; }
+
+/* ===== SCORE GAUGE ===== */
+.gauge-section {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.gauge-wrap {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+}
+.gauge-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.gauge-bg { fill: none; stroke: var(--faint); stroke-width: 14; }
+.gauge-bar { fill: none; stroke-width: 14; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(.22,1,.36,1); }
+.gauge-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.gauge-score {
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -2px;
+  transition: color .4s;
+}
+.gauge-max { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+.score-summary { flex: 1; min-width: 200px; }
+.score-label {
+  font-size: clamp(20px, 3.5vw, 26px);
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.score-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.score-pills {
+  display: flex;
+  gap: 6px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.score-pill {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid;
+  font-weight: 600;
+}
+.pill-ok   { color: var(--green);  background: rgba(16,185,129,.1);  border-color: rgba(16,185,129,.3); }
+.pill-ng   { color: var(--grey);   background: rgba(75,85,99,.1);    border-color: rgba(75,85,99,.3);   }
+
+/* ===== K CARDS ===== */
+.k-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+@media (max-width: 560px) {
+  .k-cards { grid-template-columns: 1fr; }
+  .gauge-section { gap: 20px; }
+}
+.k-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.k-card.ok  { border-color: rgba(16,185,129,.35); }
+.k-card.ng  { border-color: var(--border); }
+.k-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.k-card.ok::before { background: radial-gradient(circle at 50% 0%, rgba(16,185,129,.06) 0%, transparent 70%); opacity: 1; }
+
+.k-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+.k-name { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: 0.04em; margin-bottom: 10px; }
+.k-points {
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.k-points-max { font-size: 13px; color: var(--muted); }
+.k-card.ok .k-points { color: var(--green2); }
+.k-card.ng .k-points { color: var(--grey); }
+.k-sep { height: 1px; background: var(--border); margin: 12px 0; }
+.k-metric { font-size: 12px; line-height: 1.7; }
+.k-metric-row { display: flex; justify-content: space-between; align-items: center; }
+.k-metric-label { color: var(--muted); }
+.k-metric-val { font-weight: 600; font-family: monospace; }
+.k-metric-val.ok  { color: var(--green2); }
+.k-metric-val.ng  { color: var(--muted); }
+.k-criterion {
+  margin-top: 10px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--bg3);
+}
+.k-card.ok .k-criterion { color: var(--green); background: rgba(16,185,129,.08); }
+.k-card.ng .k-criterion { color: var(--muted); }
+.k-badge {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+.k-card.ok .k-badge { background: rgba(16,185,129,.15); }
+.k-card.ng .k-badge { background: rgba(75,85,99,.15); }
+
+/* Progress bar per K */
+.k-bar-wrap { margin-top: 10px; height: 4px; background: var(--faint); border-radius: 2px; overflow: hidden; }
+.k-bar { height: 100%; border-radius: 2px; transition: width 1s cubic-bezier(.22,1,.36,1); }
+.k-card.ok .k-bar { background: var(--green); }
+.k-card.ng .k-bar  { background: var(--grey); }
+
+/* ===== DETAIL TABLE ===== */
+.detail-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+.detail-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+.detail-item {}
+.detail-item-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.detail-item-val   { font-size: 20px; font-weight: 700; font-family: monospace; }
+.detail-item-sub   { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.val-ok { color: var(--green2); }
+.val-ng { color: var(--grey); }
+.val-warn { color: var(--orange); }
+
+/* ===== WATERMARK / FOOTER ===== */
+.result-footer {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.result-brand {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.result-brand strong { color: var(--gold); }
+.result-note { font-size: 10px; color: var(--faint); }
+
+/* ===== IDLE STATE ===== */
+.idle-state {
+  text-align: center;
+  padding: 48px 20px 80px;
+}
+.idle-examples {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.example-chip {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--muted);
   transition: all .15s;
 }
-.page-btn:hover { border-color: var(--accent); color: var(--accent); }
-.page-btn.active { background: rgba(0,212,255,0.15); border-color: var(--accent); color: var(--accent); font-weight: 700; }
-.page-btn:disabled { opacity: 0.3; cursor: default; }
-.page-info { font-size: 12px; color: var(--muted); padding: 0 8px; }
+.example-chip:hover { border-color: var(--gold); color: var(--gold); background: rgba(245,158,11,.08); }
 
-/* ===== LEGEND ===== */
-.legend { background: var(--bg2); border-top: 1px solid var(--border); padding: 16px 24px; }
-.legend-title { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 8px; letter-spacing: 0.05em; }
-.legend-grid { display: flex; flex-wrap: wrap; gap: 16px; }
-.legend-item { display: flex; align-items: flex-start; gap: 8px; }
-.legend-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-.legend-text strong { display: block; font-size: 12px; color: var(--text); }
-.legend-text span { font-size: 11px; color: var(--muted); }
-.score-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-.score-leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
-.score-leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-
-/* ===== FOOTER ===== */
-.footer { text-align: center; padding: 12px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); }
-.footer a { color: var(--accent); text-decoration: none; }
-
-/* ===== EMPTY STATE ===== */
-.empty { text-align: center; padding: 60px 24px; color: var(--muted); }
-.empty-icon { font-size: 40px; margin-bottom: 12px; }
-
-/* ===== LOADING ===== */
-.loading { text-align: center; padding: 60px; color: var(--muted); }
-.spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin-bottom: 12px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-@media (max-width: 768px) {
-  .stats-bar { overflow-x: auto; }
-  .stat-item { min-width: 80px; padding: 8px 10px; }
-  .stat-num { font-size: 18px; }
-  .header { padding: 12px 16px; }
-  .controls { padding: 10px 16px; }
-  .result-info { padding: 6px 16px; }
-  tbody td { padding: 8px 10px; }
-  .profit-vals { display: none; }
+.idle-k-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  max-width: 480px;
+  margin: 28px auto 0;
 }
+@media (max-width: 480px) { .idle-k-grid { grid-template-columns: 1fr; } }
+.idle-k-item {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 12px;
+  text-align: center;
+}
+.idle-k-icon { font-size: 24px; margin-bottom: 6px; }
+.idle-k-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.idle-k-desc { font-size: 10px; color: var(--muted); line-height: 1.5; }
+
+/* ===== SITE FOOTER ===== */
+.site-footer {
+  margin-top: auto;
+  width: 100%;
+  text-align: center;
+  padding: 16px;
+  font-size: 11px;
+  color: var(--faint);
+  border-top: 1px solid var(--border);
+}
+.site-footer a { color: var(--muted); text-decoration: none; }
+.site-footer a:hover { color: var(--gold); }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.result-area.visible { animation: fadeUp .4s ease; }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="header-top">
-    <div>
-      <span class="logo">4K<span>カウンター</span></span>
-      <span id="sampleBadge" class="sample-badge" style="display:none">サンプルデータ</span>
-    </div>
-    <div class="header-meta">
-      日本上場企業の4K達成度 ／ 更新: <strong id="updatedAt">—</strong>
-    </div>
+<!-- ===== HEADER ===== -->
+<div class="site-header">
+  <div class="brand">
+    <span class="brand-dot"></span>
+    たけざわ投資塾
+    <span class="brand-dot"></span>
   </div>
+  <h1 class="app-title">4K<span>カウンター</span></h1>
+  <p class="app-sub">企業名または証券コードを入力して「4K力」を即座に採点</p>
 </div>
 
-<!-- STATS BAR -->
-<div class="stats-bar">
-  <div class="stat-item">
-    <div class="stat-num" id="statTotal">—</div>
-    <div class="stat-label">対象企業数</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-num s100" id="stat100">—</div>
-    <div class="stat-label">100点（完全4K）</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-num s67" id="stat67">—</div>
-    <div class="stat-label">67点以上</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-num s34" id="stat34">—</div>
-    <div class="stat-label">34点以上</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-num s0" id="stat0">—</div>
-    <div class="stat-label">0点（未達）</div>
-  </div>
-</div>
-
-<!-- CONTROLS -->
-<div class="controls">
-  <div class="search-wrap">
+<!-- ===== SEARCH ===== -->
+<div class="search-section">
+  <div class="search-box">
     <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="会社名・証券コードで検索">
+    <input
+      class="search-input"
+      id="searchInput"
+      type="text"
+      placeholder="例: 6861 または キーエンス"
+      autocomplete="off"
+      spellcheck="false"
+    >
+    <button class="clear-btn" id="clearBtn" onclick="clearSearch()">✕</button>
   </div>
-  <select id="sectorSelect"><option value="">全業種</option></select>
-  <select id="marketSelect">
-    <option value="">全市場</option>
-    <option value="プライム">プライム</option>
-    <option value="スタンダード">スタンダード</option>
-    <option value="グロース">グロース</option>
-  </select>
-  <select id="scoreSelect">
-    <option value="all">全スコア</option>
-    <option value="100">100点のみ</option>
-    <option value="67">67点以上</option>
-    <option value="34">34点以上</option>
-    <option value="1">1点以上</option>
-    <option value="0">0点のみ</option>
-  </select>
-  <div class="filter-chips">
-    <div class="chip chip-g" id="chipGrowth" onclick="toggleChip('growth')">
-      <span class="chip-dot"></span>高成長
-    </div>
-    <div class="chip chip-p" id="chipProfit" onclick="toggleChip('profit')">
-      <span class="chip-dot"></span>高収益
-    </div>
-    <div class="chip chip-f" id="chipFinance" onclick="toggleChip('finance')">
-      <span class="chip-dot"></span>高財務
-    </div>
+
+  <!-- Autocomplete dropdown -->
+  <div class="dropdown" id="dropdown">
+    <div id="dropdownList"></div>
+  </div>
+
+  <!-- Data notice -->
+  <div class="notice" id="dataNotice" style="display:none">
+    <span class="notice-sample" id="noticeBadge">サンプル</span>
+    <span id="noticeText">—</span>
   </div>
 </div>
 
-<!-- RESULT INFO -->
-<div class="result-info">
-  <span id="resultCount">読み込み中...</span>
-  <span class="sort-hint" id="sortHint"></span>
-</div>
-
-<!-- TABLE -->
-<div class="table-wrap" id="tableWrap">
-  <div class="loading">
-    <div class="spinner"></div>
-    <div>データを読み込み中...</div>
+<!-- ===== IDLE STATE ===== -->
+<div class="idle-state" id="idleState">
+  <div class="idle-k-grid">
+    <div class="idle-k-item">
+      <div class="idle-k-icon">📈</div>
+      <div class="idle-k-name">高成長</div>
+      <div class="idle-k-desc">3年CAGR<br>10%以上</div>
+    </div>
+    <div class="idle-k-item">
+      <div class="idle-k-icon">💰</div>
+      <div class="idle-k-name">高収益</div>
+      <div class="idle-k-desc">今期・来期<br>営業利益率 10%超</div>
+    </div>
+    <div class="idle-k-item">
+      <div class="idle-k-icon">🏦</div>
+      <div class="idle-k-name">高財務</div>
+      <div class="idle-k-desc">自己資本比率<br>50%以上</div>
+    </div>
   </div>
+  <div class="idle-examples" id="exampleChips"></div>
 </div>
 
-<!-- PAGINATION -->
-<div class="pagination" id="pagination"></div>
+<!-- ===== RESULT ===== -->
+<div class="result-area" id="resultArea">
 
-<!-- LEGEND -->
-<div class="legend">
-  <div class="legend-title">4K基準（たけざわ投資塾）</div>
-  <div class="legend-grid">
-    <div class="legend-item">
-      <div class="legend-icon" style="color:var(--green)">📈</div>
-      <div class="legend-text">
-        <strong>高成長（34点）</strong>
-        <span>直近3年間の売上高成長率（CAGR）≥ 10%</span>
+  <!-- Company header -->
+  <div class="co-header">
+    <div class="co-info">
+      <div class="co-code" id="rCode">—</div>
+      <div class="co-name" id="rName">—</div>
+      <div class="co-meta" id="rMeta"></div>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <!-- Score gauge -->
+  <div class="gauge-section">
+    <div class="gauge-wrap">
+      <svg class="gauge-svg" viewBox="0 0 200 200">
+        <circle class="gauge-bg" cx="100" cy="100" r="82"/>
+        <circle class="gauge-bar" id="gaugeBar" cx="100" cy="100" r="82"
+          stroke-dasharray="515.22" stroke-dashoffset="515.22"/>
+      </svg>
+      <div class="gauge-center">
+        <div class="gauge-score" id="gaugeScore">0</div>
+        <div class="gauge-max">/ 100点</div>
       </div>
     </div>
-    <div class="legend-item">
-      <div class="legend-icon" style="color:var(--accent)">💰</div>
-      <div class="legend-text">
-        <strong>高収益（33点）</strong>
-        <span>今期・来期の営業利益率がともに 10%超</span>
-      </div>
-    </div>
-    <div class="legend-item">
-      <div class="legend-icon" style="color:var(--gold)">🏦</div>
-      <div class="legend-text">
-        <strong>高財務（33点）</strong>
-        <span>自己資本比率 ≥ 50%（金融・不動産業は ≥ 10%）</span>
-      </div>
+
+    <div class="score-summary">
+      <div class="score-label" id="scoreLabel">—</div>
+      <div class="score-desc" id="scoreDesc">—</div>
+      <div class="score-pills" id="scorePills"></div>
     </div>
   </div>
-  <div class="score-legend">
-    <div class="score-leg-item"><div class="score-leg-dot" style="background:var(--gold)"></div>100点: 全基準達成（完全4K企業）</div>
-    <div class="score-leg-item"><div class="score-leg-dot" style="background:var(--green)"></div>67点: 2基準達成（成長×収益）</div>
-    <div class="score-leg-item"><div class="score-leg-dot" style="background:var(--orange)"></div>34–66点: 1〜2基準達成</div>
-    <div class="score-leg-item"><div class="score-leg-dot" style="background:var(--red)"></div>1–33点: 1基準のみ達成</div>
-    <div class="score-leg-item"><div class="score-leg-dot" style="background:var(--score0)"></div>0点: 未達</div>
+
+  <!-- 3K cards -->
+  <div class="k-cards" id="kCards">
+    <!-- Rendered by JS -->
   </div>
+
+  <!-- Detail -->
+  <div class="detail-card">
+    <div class="detail-title">数値詳細</div>
+    <div class="detail-grid" id="detailGrid"></div>
+  </div>
+
+  <!-- Result footer -->
+  <div class="result-footer">
+    <div class="result-brand">採点: <strong>たけざわ投資塾 4K基準</strong></div>
+    <div class="result-note" id="resultNote"></div>
+  </div>
+
 </div>
 
-<!-- FOOTER -->
-<div class="footer">
-  データ出典: <a href="https://jpx-jquants.com/" target="_blank">J-Quants API (JPX)</a>
-  ／ 本アプリは投資判断の参考情報です。最終判断はご自身でお願いします。
+<!-- ===== SITE FOOTER ===== -->
+<div class="site-footer">
+  <a href="https://jpx-jquants.com/" target="_blank">J-Quants API</a> データ使用
+  ／ 本ツールは情報提供のみを目的とし、投資判断を推奨するものではありません。
 </div>
 
 <script>
 'use strict';
+
 // ===== CONSTANTS =====
-const PER_PAGE = 50;
-const FINANCIAL_SECTORS = new Set(['銀行業','証券・先物商品取引業','保険業','その他金融業','不動産業']);
+const CIRCUMFERENCE = 2 * Math.PI * 82; // ≈ 515.22
 
-// ===== STATE =====
-let allCompanies = [];
-let filtered = [];
-let page = 1;
-let sortCol = 'score';
-let sortDir = 'desc';
-let filters = { search: '', sector: '', market: '', score: 'all', growth: false, profit: false, finance: false };
+// ===== DATA =====
+let companies = [];
+let focusIdx  = -1;
+let currentMatches = [];
 
-// ===== SCORE LOGIC =====
+// ===== SCORING =====
 function calcScore(c) {
   const threshold = c.is_financial_sector ? 0.10 : 0.50;
+
   const highGrowth  = typeof c.cagr_3yr === 'number' && c.cagr_3yr >= 0.10;
-  const highProfit  = typeof c.op_margin_current === 'number' && c.op_margin_current > 0.10
-                   && typeof c.op_margin_next    === 'number' && c.op_margin_next    > 0.10;
+
+  const opmOk = v => typeof v === 'number' && v > 0.10;
+  const highProfit =
+    opmOk(c.op_margin_current) &&
+    (c.op_margin_next == null || opmOk(c.op_margin_next));
+  const highProfitStrict =
+    opmOk(c.op_margin_current) && opmOk(c.op_margin_next);
+
   const highFinance = typeof c.equity_ratio === 'number' && c.equity_ratio >= threshold;
-  const score = (highGrowth ? 34 : 0) + (highProfit ? 33 : 0) + (highFinance ? 33 : 0);
-  return { highGrowth, highProfit, highFinance, score };
+
+  const pts_growth  = highGrowth  ? 34 : 0;
+  const pts_profit  = (c.op_margin_next != null ? highProfitStrict : (opmOk(c.op_margin_current) ? 33 : 0)) > 0 ? 33 : 0;
+  const pts_finance = highFinance ? 33 : 0;
+  const score = pts_growth + pts_profit + pts_finance;
+
+  const hpFinal = pts_profit === 33;
+
+  return { highGrowth, highProfit: hpFinal, highFinance, pts_growth, pts_profit, pts_finance, score };
 }
 
-// ===== FORMAT HELPERS =====
-const pct  = v => (v == null ? '—' : (v * 100).toFixed(1) + '%');
-const pctN = v => (v == null ? '—' : (v > 0 ? '+' : '') + (v * 100).toFixed(1) + '%');
+// ===== FORMATTING =====
+const pct = v => v == null ? '—' : (v * 100).toFixed(1) + '%';
 
-function scoreBadgeClass(s) {
-  if (s === 100) return 's-100';
-  if (s >= 67)  return 's-high';
-  if (s >= 34)  return 's-mid';
-  if (s >= 1)   return 's-low';
-  return 's-zero';
+function scoreColor(s) {
+  if (s === 100) return 'var(--gold)';
+  if (s >= 67)  return 'var(--green)';
+  if (s >= 34)  return 'var(--orange)';
+  if (s >= 1)   return 'var(--red)';
+  return 'var(--grey)';
 }
 
-// ===== FILTER & SORT =====
-function applyAll() {
-  const q = filters.search.toLowerCase();
-  filtered = allCompanies.filter(c => {
-    if (q && !c.name.toLowerCase().includes(q) && !c.code.includes(q)) return false;
-    if (filters.sector && c.sector !== filters.sector) return false;
-    if (filters.market && c.market !== filters.market) return false;
-    if (filters.growth  && !c.highGrowth)  return false;
-    if (filters.profit  && !c.highProfit)  return false;
-    if (filters.finance && !c.highFinance) return false;
-    const s = c.score;
-    if (filters.score === '100' && s !== 100) return false;
-    if (filters.score === '67'  && s < 67)  return false;
-    if (filters.score === '34'  && s < 34)  return false;
-    if (filters.score === '1'   && s < 1)   return false;
-    if (filters.score === '0'   && s !== 0) return false;
-    return true;
-  });
-
-  filtered.sort((a, b) => {
-    let av = a[sortCol], bv = b[sortCol];
-    if (av == null && bv == null) return 0;
-    if (av == null) return 1;
-    if (bv == null) return -1;
-    if (typeof av === 'string') return sortDir === 'asc' ? av.localeCompare(bv,'ja') : bv.localeCompare(av,'ja');
-    return sortDir === 'asc' ? av - bv : bv - av;
-  });
-
-  page = 1;
-  render();
+function scoreLabel(s, hg, hp, hf) {
+  if (s === 100) return '完全4K企業 🏆';
+  if (s >= 67) {
+    if (hg && hp)  return '高成長×高収益 型';
+    if (hg && hf)  return '高成長×高財務 型';
+    if (hp && hf)  return '高収益×高財務 型';
+    return '2K達成企業';
+  }
+  if (s >= 34) {
+    if (hg) return '高成長のみ達成';
+    if (hp) return '高収益のみ達成';
+    if (hf) return '高財務のみ達成';
+  }
+  return '4K基準 未達';
 }
 
-// ===== RENDER =====
-function render() {
-  renderResult();
-  renderTable();
-  renderPagination();
+function scoreDesc(s, hg, hp, hf) {
+  if (s === 100) return '高成長・高収益・高財務のすべてを満たす、たけざわ投資塾が定義する理想の4K企業です。';
+  if (s >= 67) {
+    const met = [hg && '高成長', hp && '高収益', hf && '高財務'].filter(Boolean);
+    const missing = [!hg && '高成長', !hp && '高収益', !hf && '高財務'].filter(Boolean);
+    return `${met.join('・')}を達成。残る${missing.join('・')}の改善で完全4K企業に到達できます。`;
+  }
+  if (s >= 1) return '一部の4K基準は達成していますが、複数の課題が残ります。経営改善の方向性を確認してください。';
+  return '現時点では4K基準のいずれも満たしていません。業績トレンドと財務改善を継続的に確認してください。';
 }
 
-function renderResult() {
-  document.getElementById('resultCount').textContent =
-    `${filtered.length.toLocaleString()}社を表示`;
-  document.getElementById('sortHint').textContent =
-    `並び順: ${colLabel(sortCol)} ${sortDir === 'asc' ? '↑' : '↓'}`;
+// ===== RENDER RESULT =====
+function showResult(c) {
+  const { highGrowth, highProfit, highFinance, pts_growth, pts_profit, pts_finance, score } = calcScore(c);
+  const threshold = c.is_financial_sector ? 0.10 : 0.50;
+
+  // Company header
+  document.getElementById('rCode').textContent = c.code;
+  document.getElementById('rName').textContent = c.name;
+  const meta = document.getElementById('rMeta');
+  meta.innerHTML = `
+    <span class="co-tag">${c.sector}</span>
+    <span class="co-tag">${c.market}市場</span>
+    ${c.is_financial_sector ? '<span class="co-fin-tag">金融・不動産（自己資本比率 10%基準）</span>' : ''}
+    ${c.fiscal_year_end ? `<span class="co-tag">決算: ${c.fiscal_year_end}</span>` : ''}
+  `;
+
+  // Gauge
+  const color = scoreColor(score);
+  const bar = document.getElementById('gaugeBar');
+  bar.style.stroke = color;
+  bar.style.strokeDashoffset = CIRCUMFERENCE * (1 - score / 100);
+
+  // Score number (count-up animation)
+  const scoreEl = document.getElementById('gaugeScore');
+  scoreEl.style.color = color;
+  let current = 0;
+  const duration = 1000;
+  const start = performance.now();
+  function countUp(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    current = Math.round(ease * score);
+    scoreEl.textContent = current;
+    if (progress < 1) requestAnimationFrame(countUp);
+  }
+  requestAnimationFrame(countUp);
+
+  // Score summary
+  document.getElementById('scoreLabel').textContent = scoreLabel(score, highGrowth, highProfit, highFinance);
+  document.getElementById('scoreLabel').style.color = color;
+  document.getElementById('scoreDesc').textContent  = scoreDesc(score, highGrowth, highProfit, highFinance);
+
+  // Pills
+  const pills = [
+    { ok: highGrowth,  label: '高成長' },
+    { ok: highProfit,  label: '高収益' },
+    { ok: highFinance, label: '高財務' },
+  ];
+  document.getElementById('scorePills').innerHTML = pills.map(p =>
+    `<span class="score-pill ${p.ok ? 'pill-ok' : 'pill-ng'}">${p.ok ? '✓' : '✗'} ${p.label}</span>`
+  ).join('');
+
+  // K Cards
+  const kDefs = [
+    {
+      icon: '📈', name: '高成長', ok: highGrowth, pts: pts_growth, max: 34,
+      criterion: `3年CAGR ≥ 10%（基準: ${(0.10*100).toFixed(0)}%以上）`,
+      metrics: [
+        { label: '3年CAGR',  val: c.cagr_3yr,           ok: highGrowth,  format: pct },
+        { label: '基準値',   val: 0.10,                 ok: true,        format: v => '≥ ' + pct(v) + ' ✓' },
+      ]
+    },
+    {
+      icon: '💰', name: '高収益', ok: highProfit, pts: pts_profit, max: 33,
+      criterion: '今期・来期の営業利益率ともに 10%超',
+      metrics: [
+        { label: '今期 OPM',  val: c.op_margin_current, ok: typeof c.op_margin_current === 'number' && c.op_margin_current > 0.10, format: pct },
+        { label: '来期 OPM',  val: c.op_margin_next,    ok: typeof c.op_margin_next    === 'number' && c.op_margin_next    > 0.10, format: v => v == null ? '予想データなし' : pct(v) },
+        { label: '基準値',   val: 0.10,                ok: true,        format: v => '> ' + pct(v) + ' ✓' },
+      ]
+    },
+    {
+      icon: '🏦', name: '高財務', ok: highFinance, pts: pts_finance, max: 33,
+      criterion: `自己資本比率 ≥ ${Math.round(threshold*100)}%${c.is_financial_sector ? '（金融・不動産 特別基準）' : ''}`,
+      metrics: [
+        { label: '自己資本比率', val: c.equity_ratio, ok: highFinance, format: pct },
+        { label: '基準値',       val: threshold,       ok: true,       format: v => '≥ ' + pct(v) + ' ✓' },
+      ]
+    },
+  ];
+
+  document.getElementById('kCards').innerHTML = kDefs.map(k => `
+    <div class="k-card ${k.ok ? 'ok' : 'ng'}">
+      <span class="k-badge">${k.ok ? '✓' : '✗'}</span>
+      <span class="k-icon">${k.icon}</span>
+      <div class="k-name">${k.name}</div>
+      <div class="k-points">${k.pts}<span class="k-points-max"> / ${k.max}点</span></div>
+      <div class="k-bar-wrap"><div class="k-bar" style="width:${k.max > 0 ? (k.pts/k.max*100) : 0}%"></div></div>
+      <div class="k-sep"></div>
+      <div class="k-metric">
+        ${k.metrics.map(m => `
+          <div class="k-metric-row">
+            <span class="k-metric-label">${m.label}</span>
+            <span class="k-metric-val ${m.ok ? 'ok' : 'ng'}">${m.format(m.val)}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="k-criterion">${k.ok ? '✓' : '◻'} ${k.criterion}</div>
+    </div>
+  `).join('');
+
+  // Detail grid
+  document.getElementById('detailGrid').innerHTML = `
+    <div class="detail-item">
+      <div class="detail-item-label">3年売上高CAGR</div>
+      <div class="detail-item-val ${highGrowth ? 'val-ok' : 'val-ng'}">${pct(c.cagr_3yr)}</div>
+      <div class="detail-item-sub">基準: ≥ 10%</div>
+    </div>
+    <div class="detail-item">
+      <div class="detail-item-label">今期 営業利益率</div>
+      <div class="detail-item-val ${typeof c.op_margin_current === 'number' && c.op_margin_current > 0.10 ? 'val-ok' : 'val-ng'}">${pct(c.op_margin_current)}</div>
+      <div class="detail-item-sub">基準: > 10%</div>
+    </div>
+    <div class="detail-item">
+      <div class="detail-item-label">来期 営業利益率</div>
+      <div class="detail-item-val ${typeof c.op_margin_next === 'number' && c.op_margin_next > 0.10 ? 'val-ok' : c.op_margin_next == null ? 'val-warn' : 'val-ng'}">${pct(c.op_margin_next)}</div>
+      <div class="detail-item-sub">${c.op_margin_next == null ? '予想データ未開示' : '基準: > 10%'}</div>
+    </div>
+    <div class="detail-item">
+      <div class="detail-item-label">自己資本比率</div>
+      <div class="detail-item-val ${highFinance ? 'val-ok' : 'val-ng'}">${pct(c.equity_ratio)}</div>
+      <div class="detail-item-sub">基準: ≥ ${Math.round(threshold * 100)}%${c.is_financial_sector ? '（金融）' : ''}</div>
+    </div>
+  `;
+
+  // Result note
+  document.getElementById('resultNote').textContent =
+    `採点日: ${new Date().toLocaleDateString('ja-JP')}  ／  出典: J-Quants API`;
+
+  // Show result
+  document.getElementById('idleState').style.display   = 'none';
+  document.getElementById('resultArea').classList.add('visible');
+
+  // Scroll
+  setTimeout(() => document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
-function colLabel(col) {
-  return {score:'スコア',cagr_3yr:'3年CAGR',op_margin_current:'今期OPM',
-          op_margin_next:'来期OPM',equity_ratio:'自己資本比率',name:'会社名',code:'コード'}[col] || col;
-}
+// ===== AUTOCOMPLETE =====
+function updateDropdown(query) {
+  const dd = document.getElementById('dropdown');
+  const dl = document.getElementById('dropdownList');
 
-function renderTable() {
-  const wrap = document.getElementById('tableWrap');
-  const start = (page - 1) * PER_PAGE;
-  const rows  = filtered.slice(start, start + PER_PAGE);
-
-  if (rows.length === 0) {
-    wrap.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div>条件に一致する企業が見つかりません</div>`;
+  if (!query || query.length === 0) {
+    dd.classList.remove('open');
     return;
   }
 
-  const cols = [
-    {key:'code',            label:'コード',  cls:'code-cell'},
-    {key:'name',            label:'会社名',  cls:'name-cell'},
-    {key:'sector',          label:'業種',    cls:'sector-cell'},
-    {key:'score',           label:'スコア',  cls:''},
-    {key:'highGrowth',      label:'高成長',  cls:''},
-    {key:'highProfit',      label:'高収益',  cls:''},
-    {key:'highFinance',     label:'高財務',  cls:''},
-    {key:'cagr_3yr',        label:'3年CAGR', cls:''},
-    {key:'op_margin_current',label:'今期OPM',cls:''},
-    {key:'op_margin_next',  label:'来期OPM', cls:''},
-    {key:'equity_ratio',    label:'自己資本比率',cls:''},
-  ];
+  const q = query.toLowerCase().trim();
+  currentMatches = companies.filter(c =>
+    c.code.startsWith(q) || c.name.toLowerCase().includes(q)
+  ).slice(0, 8);
 
-  let thead = '<thead><tr>';
-  cols.forEach(c => {
-    const cls = c.key === sortCol ? ('sort-' + sortDir) : '';
-    const sortable = ['code','name','score','cagr_3yr','op_margin_current','op_margin_next','equity_ratio'].includes(c.key);
-    thead += `<th class="${cls}" ${sortable ? `onclick="sortBy('${c.key}')"` : ''}>${c.label}</th>`;
-  });
-  thead += '</tr></thead>';
+  focusIdx = -1;
 
-  let tbody = '<tbody>';
-  rows.forEach(c => {
-    const bc = scoreBadgeClass(c.score);
-    const threshold = c.is_financial_sector ? 0.10 : 0.50;
-
-    const growCell = `<div class="crit-cell ${c.highGrowth ? 'crit-ok' : 'crit-ng'}">
-      <span class="crit-icon">${c.highGrowth ? '✓' : '✗'}</span>
-      <span class="crit-val">${pct(c.cagr_3yr)}</span>
-    </div>`;
-
-    const profitCell = `<div class="crit-cell ${c.highProfit ? 'crit-ok' : 'crit-ng'}">
-      <span class="crit-icon">${c.highProfit ? '✓' : '✗'}</span>
-      <div class="profit-vals">
-        <span><span class="lbl">今期</span> ${pct(c.op_margin_current)}</span>
-        <span><span class="lbl">来期</span> ${pct(c.op_margin_next)}</span>
-      </div>
-    </div>`;
-
-    const finNote = c.is_financial_sector ? `<span style="font-size:9px;color:var(--muted)">（金融${Math.round(threshold*100)}%基準）</span>` : '';
-    const finCell = `<div class="crit-cell ${c.highFinance ? 'crit-ok' : 'crit-ng'}">
-      <span class="crit-icon">${c.highFinance ? '✓' : '✗'}</span>
-      <div class="profit-vals"><span>${pct(c.equity_ratio)}</span>${finNote}</div>
-    </div>`;
-
-    tbody += `<tr>
-      <td class="code-cell">${c.code}</td>
-      <td class="name-cell" title="${c.name}">${c.name}</td>
-      <td class="sector-cell">${c.sector}</td>
-      <td><span class="score-badge ${bc}">${c.score}</span></td>
-      <td>${growCell}</td>
-      <td>${profitCell}</td>
-      <td>${finCell}</td>
-      <td style="font-size:12px;color:${c.highGrowth?'var(--green)':'var(--muted)'}">${pct(c.cagr_3yr)}</td>
-      <td style="font-size:12px;color:${c.highProfit?'var(--green)':'var(--muted)'}">${pct(c.op_margin_current)}</td>
-      <td style="font-size:12px;color:${(c.op_margin_next!=null&&c.op_margin_next>0.10)?'var(--green)':'var(--muted)'}">${pct(c.op_margin_next)}</td>
-      <td style="font-size:12px;color:${c.highFinance?'var(--green)':'var(--muted)'}">${pct(c.equity_ratio)}</td>
-    </tr>`;
-  });
-  tbody += '</tbody>';
-
-  wrap.innerHTML = `<table>${thead}${tbody}</table>`;
-}
-
-function renderPagination() {
-  const total = Math.ceil(filtered.length / PER_PAGE);
-  const pg = document.getElementById('pagination');
-  if (total <= 1) { pg.innerHTML = ''; return; }
-
-  let html = `<button class="page-btn" onclick="goPage(${page-1})" ${page===1?'disabled':''}>‹ 前</button>`;
-  const range = [];
-  for (let i = 1; i <= total; i++) {
-    if (i === 1 || i === total || (i >= page-2 && i <= page+2)) range.push(i);
-    else if (range[range.length-1] !== '...') range.push('...');
+  if (currentMatches.length === 0) {
+    dl.innerHTML = `<div class="dropdown-empty">「${query}」に一致する企業が見つかりません<br><small style="font-size:10px;color:var(--faint)">※現在サンプル企業のみ収録。J-Quants連携で全上場企業対応</small></div>`;
+  } else {
+    dl.innerHTML = currentMatches.map((c, i) => {
+      const { score } = calcScore(c);
+      const col = scoreColor(score);
+      return `
+        <div class="dropdown-item" onclick="selectCompany(${i})" data-idx="${i}">
+          <span class="di-code">${c.code}</span>
+          <span class="di-name">${c.name}</span>
+          <span class="di-sector">${c.sector}</span>
+          <span style="font-size:12px;font-weight:700;color:${col};margin-left:auto;padding-left:8px">${score}点</span>
+        </div>`;
+    }).join('');
   }
-  range.forEach(r => {
-    if (r === '...') { html += `<span class="page-info">…</span>`; }
-    else { html += `<button class="page-btn ${r===page?'active':''}" onclick="goPage(${r})">${r}</button>`; }
-  });
-  html += `<button class="page-btn" onclick="goPage(${page+1})" ${page===total?'disabled':''}>次 ›</button>`;
-  html += `<span class="page-info">${filtered.length}社中 ${(page-1)*PER_PAGE+1}〜${Math.min(page*PER_PAGE,filtered.length)}社</span>`;
-  pg.innerHTML = html;
+
+  dd.classList.add('open');
 }
 
-function renderStats(companies) {
-  const s100 = companies.filter(c => c.score === 100).length;
-  const s67  = companies.filter(c => c.score >= 67).length;
-  const s34  = companies.filter(c => c.score >= 34).length;
-  const s0   = companies.filter(c => c.score === 0).length;
-  document.getElementById('statTotal').textContent = companies.length.toLocaleString();
-  document.getElementById('stat100').textContent   = s100.toLocaleString();
-  document.getElementById('stat67').textContent    = s67.toLocaleString();
-  document.getElementById('stat34').textContent    = s34.toLocaleString();
-  document.getElementById('stat0').textContent     = s0.toLocaleString();
+function selectCompany(idx) {
+  const c = currentMatches[idx];
+  if (!c) return;
+  document.getElementById('searchInput').value = `${c.code}　${c.name}`;
+  document.getElementById('clearBtn').classList.add('visible');
+  document.getElementById('dropdown').classList.remove('open');
+  showResult(c);
 }
 
-function renderSectors(companies) {
-  const sectors = [...new Set(companies.map(c => c.sector))].sort((a,b) => a.localeCompare(b,'ja'));
-  const sel = document.getElementById('sectorSelect');
-  sectors.forEach(s => {
-    const o = document.createElement('option'); o.value = s; o.textContent = s;
-    sel.appendChild(o);
-  });
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('clearBtn').classList.remove('visible');
+  document.getElementById('dropdown').classList.remove('open');
+  document.getElementById('resultArea').classList.remove('visible');
+  document.getElementById('idleState').style.display = '';
+  document.getElementById('searchInput').focus();
+  currentMatches = [];
+  focusIdx = -1;
 }
 
-// ===== SORT =====
-function sortBy(col) {
-  if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-  else { sortCol = col; sortDir = col === 'score' ? 'desc' : 'asc'; }
-  applyAll();
-}
+// ===== KEYBOARD NAVIGATION =====
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  const dd = document.getElementById('dropdown');
+  if (!dd.classList.contains('open')) return;
 
-// ===== PAGE NAV =====
-function goPage(p) {
-  const total = Math.ceil(filtered.length / PER_PAGE);
-  if (p < 1 || p > total) return;
-  page = p;
-  renderTable();
-  renderPagination();
-  window.scrollTo({top: 0, behavior: 'smooth'});
-}
+  const items = document.querySelectorAll('.dropdown-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    focusIdx = Math.min(focusIdx + 1, items.length - 1);
+    items.forEach((el,i) => el.classList.toggle('focused', i === focusIdx));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    focusIdx = Math.max(focusIdx - 1, -1);
+    items.forEach((el,i) => el.classList.toggle('focused', i === focusIdx));
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (focusIdx >= 0) selectCompany(focusIdx);
+    else if (currentMatches.length === 1) selectCompany(0);
+  } else if (e.key === 'Escape') {
+    dd.classList.remove('open');
+  }
+});
 
-// ===== CHIPS =====
-function toggleChip(key) {
-  filters[key] = !filters[key];
-  document.getElementById('chip' + key.charAt(0).toUpperCase() + key.slice(1))
-    .classList.toggle('active', filters[key]);
-  applyAll();
-}
-
-// ===== EVENT LISTENERS =====
 document.getElementById('searchInput').addEventListener('input', e => {
-  filters.search = e.target.value; applyAll();
+  const v = e.target.value;
+  document.getElementById('clearBtn').classList.toggle('visible', v.length > 0);
+  updateDropdown(v);
 });
-document.getElementById('sectorSelect').addEventListener('change', e => {
-  filters.sector = e.target.value; applyAll();
-});
-document.getElementById('marketSelect').addEventListener('change', e => {
-  filters.market = e.target.value; applyAll();
-});
-document.getElementById('scoreSelect').addEventListener('change', e => {
-  filters.score = e.target.value; applyAll();
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-section')) {
+    document.getElementById('dropdown').classList.remove('open');
+  }
 });
 
 // ===== LOAD DATA =====
@@ -547,31 +923,50 @@ async function loadData() {
   try {
     const res  = await fetch('data.json');
     const data = await res.json();
+    companies  = data.companies || [];
 
-    allCompanies = data.companies.map(c => {
-      const { highGrowth, highProfit, highFinance, score } = calcScore(c);
-      return { ...c, highGrowth, highProfit, highFinance, score };
-    });
-
-    // Sort by score desc by default
-    allCompanies.sort((a,b) => b.score - a.score || a.code.localeCompare(b.code));
-
-    const dt = new Date(data.updated_at);
-    document.getElementById('updatedAt').textContent =
-      `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
-
+    // Notice
+    const notice = document.getElementById('dataNotice');
+    const badge  = document.getElementById('noticeBadge');
+    const text   = document.getElementById('noticeText');
+    notice.style.display = 'flex';
     if (data.is_sample) {
-      document.getElementById('sampleBadge').style.display = 'inline';
+      badge.textContent = 'サンプル';
+      badge.style.background = 'rgba(249,115,22,.1)';
+      badge.style.color = 'var(--orange)';
+      text.textContent = `${companies.length}社収録（デモ用）。全上場企業対応にはJ-Quants API連携が必要です。`;
+    } else {
+      badge.textContent = '最新データ';
+      badge.style.background = 'rgba(16,185,129,.1)';
+      badge.style.borderColor = 'rgba(16,185,129,.3)';
+      badge.style.color = 'var(--green)';
+      const dt = new Date(data.updated_at);
+      text.textContent = `${companies.length.toLocaleString()}社収録 ／ 更新: ${dt.toLocaleDateString('ja-JP')}`;
     }
 
-    renderStats(allCompanies);
-    renderSectors(allCompanies);
-    applyAll();
+    // Example chips
+    const examples = companies.filter(c => calcScore(c).score === 100).slice(0, 5);
+    document.getElementById('exampleChips').innerHTML = examples.map(c =>
+      `<span class="example-chip" onclick="quickSearch('${c.code}', '${c.name}')">${c.code} ${c.name}</span>`
+    ).join('');
 
   } catch(e) {
-    document.getElementById('tableWrap').innerHTML =
-      `<div class="empty"><div class="empty-icon">⚠️</div>データの読み込みに失敗しました。<br><small>${e.message}</small></div>`;
-    document.getElementById('resultCount').textContent = 'エラー';
+    document.getElementById('dataNotice').style.display = 'flex';
+    document.getElementById('noticeBadge').textContent = 'エラー';
+    document.getElementById('noticeText').textContent  = 'データ読み込みに失敗: ' + e.message;
+  }
+}
+
+function quickSearch(code, name) {
+  const input = document.getElementById('searchInput');
+  input.value = code;
+  document.getElementById('clearBtn').classList.add('visible');
+  updateDropdown(code);
+  // Auto-select if single match
+  const match = companies.find(c => c.code === code);
+  if (match) {
+    document.getElementById('dropdown').classList.remove('open');
+    showResult(match);
   }
 }
 
